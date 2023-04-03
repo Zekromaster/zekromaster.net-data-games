@@ -1,0 +1,54 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      run: pip install -r processing/requirements.txt
+
+    - name: Process games files and generate TOML
+      run: python processing/main.py > output.toml
+      env:
+        INPUT_FOLDER: data
+        PROOF_BASE_PATH: proof
+      id: process_games
+
+    - name: Checkout deploy repository
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ secrets.DEPLOY_REPO }}
+        ref: ${{ secrets.DEPLOY_BRANCH }}
+        path: deploy
+        ssh-key: ${{ secrets.DEPLOY_KEY }}
+        clean: false
+
+    - name: Deploy played games
+      run: |
+        cp output.toml deploy/${{ secrets.DEPLOY_TOML }}
+        rsync -av --delete proof/ deploy/${{ secrets.DEPLOY_PROOF }}/
+        cd deploy
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add ${{ secrets.DEPLOY_TOML }}
+        git commit -m "Update list of played games and corresponding proof"
+
+    - name: Push changes to deploy repository
+      run: |
+        cd deploy
+        git push
