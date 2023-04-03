@@ -45,7 +45,7 @@ jobs:
         cd deploy
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git add ${{ secrets.DEPLOY_TOML }}
+        git add --all
         git commit -m "Update list of played games and corresponding proof"
 
     - name: Push changes to deploy repository
