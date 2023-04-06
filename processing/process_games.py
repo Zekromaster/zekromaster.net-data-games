@@ -3,6 +3,24 @@ from datetime import datetime
 from slugify import slugify
 import os
 
+def remap_platform(platform):
+    platforms = {
+        "PC": "PC",
+        "PSX": "Sony PlayStation",
+        "PS2": "Sony PlayStation 2",
+        "PS3": "Sony PlayStation 3",
+        "PSP": "Sony PlayStation Portable",
+        "GCN": "Nintendo GameCube",
+        "Wii": "Nintendo Wii",
+        "WiiU": "Nintendo Wii U",
+        "NSW": "Nintendo Switch",
+        "GBA": "Nintendo GameBoy Advance",
+        "NDS": "Nintendo DS",
+        "3DS": "Nintendo 3DS"
+    }
+
+    return platforms.get(platform, platform)
+
 def process_games_text(text, proof_base_path):
     lines = text.strip().split("\n")
     completed_games = []
@@ -48,7 +66,7 @@ def process_games_text(text, proof_base_path):
             "completion": completion,
             "start": start_iso,
             "end": end_iso,
-            "platform": platform,
+            "platform": remap_platform(platform),
             "proof": proof_files,
             "slug": slug
         }
