@@ -38,7 +38,8 @@ jobs:
         ssh-key: ${{ secrets.DEPLOY_KEY }}
         clean: false
 
-    - name: Deploy played games
+    - name: Generate commit
+      id: generate_commit
       run: |
         cp output.toml deploy/${{ secrets.DEPLOY_TOML }}
         rsync -av --delete proof/ deploy/${{ secrets.DEPLOY_PROOF }}/
@@ -46,9 +47,15 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         git add --all
-        git commit -m "Update list of played games and corresponding proof"
+        if [ -n "$(git status --untracked-files=no --porcelain)" ]; then
+          git commit -m "Update list of played games and corresponding proof"
+          echo "hasChanges=1" >> $GITHUB_OUTPUT
+        else
+          echo "hasChanges=0" >> $GITHUB_OUTPUT;
+        fi
 
-    - name: Push changes to deploy repository
+    - name: Push any changes to deploy repository
+      if: steps.generate_commit.outputs.hasChanges == 1
       run: |
         cd deploy
         git push
