@@ -16,7 +16,8 @@ def remap_platform(platform):
         "NSW": "Nintendo Switch",
         "GBA": "Nintendo GameBoy Advance",
         "NDS": "Nintendo DS",
-        "3DS": "Nintendo 3DS"
+        "3DS": "Nintendo 3DS",
+        "X360": "Microsoft Xbox 360",
     }
 
     return platforms.get(platform, platform)
